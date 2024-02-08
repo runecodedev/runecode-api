@@ -1,0 +1,1 @@
+exports.initDatabaseConnection = (mongodbConnectionString) => require('mongoose').connect(mongodbConnectionString)
