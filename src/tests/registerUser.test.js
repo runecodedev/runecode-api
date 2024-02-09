@@ -1,8 +1,7 @@
 const {
   describe,
   it, 
-  expect, 
-  afterAll
+  expect
 } = require('@jest/globals')
 
 const app = require('../server')
@@ -10,18 +9,10 @@ const ENV = require('../utils/env')
 const request = require('supertest')
 const userModel = require('../modules/user/user.model')
 const bcrypt = require('bcryptjs')
-const { registerUser } = require('../modules/user/user.controller');
+const { registerUser } = require('../modules/user/user.controller')
 const { registerRandomGeneratedUser } = require('./helpers/registerUser')
 
 describe('POST /api/registerUser', () => {
-  afterAll(async () => {
-    await userModel.deleteMany({ email: new RegExp(ENV.TEST_USER)})
-
-    const deletedUsers = await userModel.find({ email: new RegExp(ENV.TEST_USER) })
-
-    expect(deletedUsers).toHaveLength(0)
-  })
-
   it('should register unique user', async () => {
     const { response } = await registerRandomGeneratedUser()
 

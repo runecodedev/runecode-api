@@ -11,13 +11,7 @@ initCors(app)
 initBodyParser(app)
 initRouter(app)
 initDatabaseConnection(mongodbConnectionString)
-  .then(() => {
-    app.listen(ENV.SERVER_PORT, () => {
-      // console.log('running');
-    })
-  })
-  .catch((error) => {
-    console.log(`${error}`);
-  })
 
-module.exports = app
+const PORT = process.env.NODE_ENV === 'test' ? null : ENV.SERVER_PORT
+
+module.exports = app.listen(PORT)
