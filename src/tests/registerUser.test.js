@@ -51,10 +51,36 @@ describe('POST /api/registerUser', () => {
     expect(response.status).toBe(400)
   })
 
+  it('should not register user with bad email', async () => {
+    const user = {
+      email: 'email',
+      password: ENV.TEST_PASSWORD
+    }
+
+    const response = await request(app)
+      .post('/api/registerUser')
+      .send(user)
+
+    expect(response.status).toBe(400)
+  })
+
   it('should not register user without password', async () => {
     const user = {
       email: `${ENV.TEST_USER}@${ENV.TEST_DOMAIN}`,
       password: undefined
+    }
+
+    const response = await request(app)
+      .post('/api/registerUser')
+      .send(user)
+
+    expect(response.status).toBe(400)
+  })
+
+  it('should not register user with password length less than 8', async () => {
+    const user = {
+      email: `${ENV.TEST_USER}@${ENV.TEST_DOMAIN}`,
+      password: 'weak'
     }
 
     const response = await request(app)
@@ -99,7 +125,7 @@ describe('POST /api/registerUser', () => {
     expect(response.status).toBe(409)
   })
 
-  it('should return status 500 when userModel throws an error', async () => {
+  it('should return status 500 when userModel save method throws an error', async () => {
     const req = {
       body: {
         email: `${ENV.TEST_USER}-${(Math.random() * 100000).toFixed()}@${ENV.TEST_DOMAIN}`,
@@ -111,9 +137,7 @@ describe('POST /api/registerUser', () => {
       json: jest.fn()
     };
 
-    userModel.findOne = jest.fn(() => {
-      throw new Error('Test error');
-    });
+    jest.spyOn(userModel.prototype, 'save').mockRejectedValue(new Error('Test error'));
 
     await registerUser(req, res);
 
