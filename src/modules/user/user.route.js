@@ -1,12 +1,14 @@
 const { Router } = require('express')
-const { registerUser } = require('./user.controller')
-const { validatePasswordForRegistration } = require('../../middleware/validatePassword')
-const { validateEmail } = require('../../middleware/validateEmail')
-const { validateUser } = require('../../middleware/validateUser')
+const { registerUser, loginUser, authorizeUser } = require('./user.controller')
+const { registerValidation } = require('../../middleware/registerValidation')
+const { loginValidation } = require('../../middleware/loginValidation')
+const jwtAuth = require('../../middleware/jwtAuth')
 
 
 const userRoute = Router()
 
-userRoute.post('/registerUser', validateEmail, validatePasswordForRegistration, validateUser, registerUser)
+userRoute.post('/registerUser', registerValidation, registerUser)
+userRoute.post('/loginUser', loginValidation, loginUser)
+userRoute.get('/authorizeUser', jwtAuth, authorizeUser)
 
 module.exports = userRoute

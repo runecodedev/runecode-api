@@ -1,26 +1,36 @@
 const {
   describe,
   it, 
-  expect
+  expect,
+  afterAll
 } = require('@jest/globals')
 
-const app = require('../server')
+const { app } = require('../server')
 const ENV = require('../utils/env')
 const request = require('supertest')
 const userModel = require('../modules/user/user.model')
 const bcrypt = require('bcryptjs')
 const { registerUser } = require('../modules/user/user.controller')
-const { registerRandomGeneratedUser } = require('./helpers/registerUser')
+const { 
+  registerTestUser,
+  deleteTestUser,
+} = require('./helpers/user')
 
 describe('POST /api/registerUser', () => {
+  afterAll(async () => {
+    expect(await deleteTestUser('uniquetest@unique.test')).toHaveLength(0)
+    expect(await deleteTestUser('testinghashedpassword@test.com')).toHaveLength(0)
+    expect(await deleteTestUser('uniquevaliduser@test.test')).toHaveLength(0)
+  })
+
   it('should register unique user', async () => {
-    const { response } = await registerRandomGeneratedUser()
+    const { response } = await registerTestUser('uniquevaliduser@test.test')
 
     expect(response.status).toBe(201)
   })
 
   it('should register unique user with hashed password', async () => {
-    const { user } = await registerRandomGeneratedUser()
+    const { user } = await registerTestUser('testinghashedpassword@test.com')
 
     const findUserInDB = await userModel.findOne({ email: user.email })
 
@@ -100,18 +110,8 @@ describe('POST /api/registerUser', () => {
   })
 
   it('should not register new user when user with given email exists', async () => {
-    const user = {
-      email: `${ENV.TEST_USER}@${ENV.TEST_DOMAIN}`,
-      password: ENV.TEST_PASSWORD
-    }
-
-    await request(app)
-      .post('/api/registerUser')
-      .send(user)
-
-    const response = await request(app)
-      .post('/api/registerUser')
-      .send(user)
+    await registerTestUser('uniquetest@unique.test')
+    const { response } = await registerTestUser('uniquetest@unique.test')
 
     expect(response.status).toBe(409)
   })
@@ -122,16 +122,16 @@ describe('POST /api/registerUser', () => {
         email: `${ENV.TEST_USER}-${(Math.random() * 100000).toFixed()}@${ENV.TEST_DOMAIN}`,
         password: ENV.TEST_PASSWORD
       }
-    };
+    }
     const res = {
       status: jest.fn(() => res),
       json: jest.fn()
-    };
+    }
 
-    jest.spyOn(userModel.prototype, 'save').mockRejectedValue(new Error('Test error'));
+    jest.spyOn(userModel.prototype, 'save').mockRejectedValue(new Error('Test error'))
 
-    await registerUser(req, res);
+    await registerUser(req, res)
 
     expect(res.status).toHaveBeenCalledWith(500)
-  });
+  })
 })

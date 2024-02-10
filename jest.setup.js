@@ -1,7 +1,5 @@
-const { deleteTestUsers } = require('./src/tests/helpers/deleteTestUsers')
+const { startServer } = require('./src/server')
 
-afterAll(async () => {
-  const deletedUsers = await deleteTestUsers()
-
-  expect(deletedUsers).toHaveLength(0)
-});
+beforeAll(async () => {
+  await startServer()
+})
