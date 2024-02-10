@@ -1,4 +1,6 @@
+const ENV = require('../../utils/env')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const userModel = require('./user.model')
 const { createResponse } = require('../../utils/response')
 
@@ -37,4 +39,46 @@ exports.registerUser = async (req, res, next) => {
       }
     }))
   }
+}
+
+exports.loginUser = async (req, res, next) => {
+  try {
+    const { savedUser } = req
+
+    const user = {
+      id: savedUser._id.toString(),
+      email: savedUser.email,
+    }
+
+    const token = jwt.sign(user, ENV.JWT_SECRET, { expiresIn: '1h' })
+
+    res.status(200).json(createResponse({
+      code: 'USER_LOGGED_IN',
+      type: 'SUCCESS',
+      message: 'User logged in',
+      data: {
+        token: token,
+        userId: user.id
+      }
+    }))
+  } catch (error) {
+    res.status(500).json(createResponse({
+      code: 'LOGIN_UNEXPECTED_ERROR',
+      type: 'ERROR',
+      message: 'Unexpected error',
+      data: {
+        errors: [
+          error
+        ]
+      }
+    }))
+  }
+}
+
+exports.authorizeUser = async (req, res, next) => {
+  res.status(200).json(createResponse({
+    code: 'USER_AUTHORIZED',
+    type: 'SUCCESS',
+    message: 'User was succesfully authorized'
+  }))
 }

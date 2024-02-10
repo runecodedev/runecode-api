@@ -1,1 +1,1 @@
-exports.initDatabaseConnection = (mongodbConnectionString) => require('mongoose').connect(mongodbConnectionString)
+exports.initDatabaseConnection = async (mongodbConnectionString) => await require('mongoose').connect(mongodbConnectionString)
